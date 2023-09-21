@@ -89,11 +89,16 @@ const getSingleBlog = async (id: string): Promise<IBlog | null> => {
 
 const updateBlog = async (
   id: string,
-  payload: Partial<IBlog>
+  payload: Partial<IBlog>,
+  verifiedUser: any
 ): Promise<IBlog | null> => {
   const isExist = await Blog.findOne({ _id: id });
   if (!isExist) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Blog not found');
+  }
+
+  if (isExist?.email !== verifiedUser?.email) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'You are not allowed');
   }
 
   const result = await Blog.findOneAndUpdate({ _id: id }, payload, {
@@ -104,7 +109,16 @@ const updateBlog = async (
 };
 
 // Delete Blog
-const deleteBlog = async (id: string): Promise<IBlog | null> => {
+const deleteBlog = async (
+  id: string,
+  verifiedUser: any
+): Promise<IBlog | null> => {
+  const isExist = await Blog.findOne({ _id: id });
+
+  if (isExist?.email !== verifiedUser?.email) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'You are not allowed');
+  }
+
   const result = await Blog.findByIdAndDelete(id);
   if (!result) {
     throw new ApiError(httpStatus.FORBIDDEN, 'Blog Not Found');

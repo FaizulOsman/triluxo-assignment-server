@@ -1,10 +1,11 @@
 import { Model } from 'mongoose';
 
 export type IBlog = {
-  imageUrl?: string;
+  imageUrl: string;
   videoUrl?: string;
-  title?: string;
+  title: string;
   description: string;
+  email: string;
   isPublished?: boolean;
 };
 

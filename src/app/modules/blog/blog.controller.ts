@@ -74,8 +74,13 @@ const getSingleBlog: RequestHandler = catchAsync(
 const updateBlog: RequestHandler = catchAsync(async (req, res) => {
   const id = req.params.id;
   const updateData = req.body;
+  const token: any = req.headers.authorization;
+  const verifiedUser = jwtHelpers.verifyToken(
+    token,
+    config.jwt.secret as Secret
+  );
 
-  const result = await BlogService.updateBlog(id, updateData);
+  const result = await BlogService.updateBlog(id, updateData, verifiedUser);
 
   sendResponse<IBlog>(res, {
     statusCode: httpStatus.OK,
@@ -88,8 +93,13 @@ const updateBlog: RequestHandler = catchAsync(async (req, res) => {
 // Delete Blog
 const deleteBlog: RequestHandler = catchAsync(async (req, res) => {
   const id = req.params.id;
+  const token: any = req.headers.authorization;
+  const verifiedUser = jwtHelpers.verifyToken(
+    token,
+    config.jwt.secret as Secret
+  );
 
-  const result = await BlogService.deleteBlog(id);
+  const result = await BlogService.deleteBlog(id, verifiedUser);
 
   sendResponse<IBlog>(res, {
     statusCode: httpStatus.OK,

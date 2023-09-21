@@ -20,6 +20,10 @@ const BlogSchema = new Schema<IBlog, BlogModel>(
       type: String,
       required: [false, 'description is missing!'],
     },
+    email: {
+      type: String,
+      required: [false, 'email is missing!'],
+    },
     isPublished: {
       type: Boolean,
       required: [false, 'isPublished is missing!'],

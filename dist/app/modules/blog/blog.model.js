@@ -4,9 +4,9 @@ exports.Blog = void 0;
 const mongoose_1 = require("mongoose");
 // Blog Schema
 const BlogSchema = new mongoose_1.Schema({
-    imgUrl: {
+    imageUrl: {
         type: String,
-        required: [false, 'imgUrl is missing!'],
+        required: [false, 'imageUrl is missing!'],
     },
     videoUrl: {
         type: String,
