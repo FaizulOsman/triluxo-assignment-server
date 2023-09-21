@@ -40,13 +40,32 @@ const getAllBlogs: RequestHandler = catchAsync(
   async (req: Request, res: Response) => {
     const filters: any = pick(req.query, blogFilterableFields);
     const paginationOptions = pick(req.query, paginationFields);
+
+    const result = await BlogService.getAllBlogs(filters, paginationOptions);
+
+    // Send Response
+    sendResponse<IBlog[]>(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: 'Blogs retrieved Successfully',
+      meta: result.meta,
+      data: result.data,
+    });
+  }
+);
+
+// Get Blogs By Authorization
+const getBlogsByAuthorization: RequestHandler = catchAsync(
+  async (req: Request, res: Response) => {
+    const filters: any = pick(req.query, blogFilterableFields);
+    const paginationOptions = pick(req.query, paginationFields);
     const token: any = req.headers.authorization;
     const verifiedUser = jwtHelpers.verifyToken(
       token,
       config.jwt.secret as Secret
     );
 
-    const result = await BlogService.getAllBlogs(
+    const result = await BlogService.getBlogsByAuthorization(
       filters,
       paginationOptions,
       verifiedUser
@@ -121,6 +140,7 @@ const deleteBlog: RequestHandler = catchAsync(async (req, res) => {
 export const BlogController = {
   createBlog,
   getAllBlogs,
+  getBlogsByAuthorization,
   getSingleBlog,
   updateBlog,
   deleteBlog,

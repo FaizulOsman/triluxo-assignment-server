@@ -20,6 +20,10 @@ const BlogSchema = new mongoose_1.Schema({
         type: String,
         required: [false, 'description is missing!'],
     },
+    email: {
+        type: String,
+        required: [false, 'email is missing!'],
+    },
     isPublished: {
         type: Boolean,
         required: [false, 'isPublished is missing!'],

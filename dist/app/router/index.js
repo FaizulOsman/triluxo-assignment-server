@@ -7,6 +7,7 @@ const express_1 = __importDefault(require("express"));
 const user_router_1 = require("../modules/user/user.router");
 const auth_router_1 = require("../modules/auth/auth.router");
 const blog_route_1 = require("../modules/blog/blog.route");
+const comment_route_1 = require("../modules/comment/comment.route");
 const router = express_1.default.Router();
 const moduleRoutes = [
     {
@@ -20,6 +21,10 @@ const moduleRoutes = [
     {
         path: '/blogs',
         route: blog_route_1.BlogRoutes,
+    },
+    {
+        path: '/comments',
+        route: comment_route_1.CommentRoutes,
     },
 ];
 moduleRoutes === null || moduleRoutes === void 0 ? void 0 : moduleRoutes.forEach(route => router.use(route === null || route === void 0 ? void 0 : route.path, route === null || route === void 0 ? void 0 : route.route));

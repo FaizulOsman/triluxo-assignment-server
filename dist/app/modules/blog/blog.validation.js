@@ -4,10 +4,11 @@ exports.BlogValidation = void 0;
 const zod_1 = require("zod");
 const createBlogZodValidation = zod_1.z.object({
     body: zod_1.z.object({
-        imageUrl: zod_1.z.string().optional(),
+        imageUrl: zod_1.z.string(),
         videoUrl: zod_1.z.string().optional(),
-        title: zod_1.z.string().optional(),
-        description: zod_1.z.string().optional(),
+        title: zod_1.z.string(),
+        description: zod_1.z.string(),
+        email: zod_1.z.string(),
         isPublished: zod_1.z.boolean().optional(),
     }),
 });
@@ -17,6 +18,7 @@ const updateBlogZodValidation = zod_1.z.object({
         videoUrl: zod_1.z.string().optional(),
         title: zod_1.z.string().optional(),
         description: zod_1.z.string().optional(),
+        email: zod_1.z.string().optional(),
         isPublished: zod_1.z.boolean().optional(),
     }),
 });

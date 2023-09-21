@@ -28,6 +28,61 @@ const createBlog = async (
 // Get All Blogs (can also filter)
 const getAllBlogs = async (
   filters: IBlogFilters,
+  paginationOptions: IPaginationOptions
+): Promise<IGenericResponse<IBlog[]>> => {
+  // Try not to use any
+  const { searchTerm, ...filtersData } = filters;
+
+  const andConditions = []; // Try not to use any
+
+  if (searchTerm) {
+    andConditions?.push({
+      $or: blogSearchableFields?.map(field => ({
+        [field]: {
+          $regex: searchTerm,
+          $options: 'i',
+        },
+      })),
+    });
+  }
+
+  if (Object.keys(filtersData).length) {
+    andConditions.push({
+      $and: Object.entries(filtersData).map(([field, value]) => {
+        return { [field]: value };
+      }),
+    });
+  }
+
+  const { page, limit, skip, sortBy, sortOrder } =
+    paginationHelper.calculatePagination(paginationOptions);
+
+  const sortCondition: '' | { [key: string]: SortOrder } = sortBy &&
+    sortOrder && { [sortBy]: sortOrder };
+
+  const whereCondition =
+    andConditions?.length > 0 ? { $and: andConditions } : {};
+
+  const result = await Blog.find(whereCondition)
+    .sort(sortCondition)
+    .skip(skip)
+    .limit(limit);
+
+  const total = await Blog.countDocuments(whereCondition);
+
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+    },
+    data: result,
+  };
+};
+
+// Get Blogs By Authorization (can also filter)
+const getBlogsByAuthorization = async (
+  filters: IBlogFilters,
   paginationOptions: IPaginationOptions,
   verifiedUser: any
 ): Promise<IGenericResponse<IBlog[]>> => {
@@ -139,6 +194,7 @@ const deleteBlog = async (
 export const BlogService = {
   createBlog,
   getAllBlogs,
+  getBlogsByAuthorization,
   getSingleBlog,
   updateBlog,
   deleteBlog,

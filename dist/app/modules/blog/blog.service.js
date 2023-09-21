@@ -40,7 +40,7 @@ const createBlog = (payload, verifiedUser) => __awaiter(void 0, void 0, void 0, 
     return result;
 });
 // Get All Blogs (can also filter)
-const getAllBlogs = (filters, paginationOptions) => __awaiter(void 0, void 0, void 0, function* () {
+const getAllBlogs = (filters, paginationOptions, verifiedUser) => __awaiter(void 0, void 0, void 0, function* () {
     // Try not to use any
     const { searchTerm } = filters, filtersData = __rest(filters, ["searchTerm"]);
     const andConditions = []; // Try not to use any
@@ -65,10 +65,18 @@ const getAllBlogs = (filters, paginationOptions) => __awaiter(void 0, void 0, vo
     const sortCondition = sortBy &&
         sortOrder && { [sortBy]: sortOrder };
     const whereCondition = (andConditions === null || andConditions === void 0 ? void 0 : andConditions.length) > 0 ? { $and: andConditions } : {};
-    const result = yield blog_model_1.Blog.find(whereCondition)
+    let result = yield blog_model_1.Blog.find(whereCondition)
         .sort(sortCondition)
         .skip(skip)
         .limit(limit);
+    if ((verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.role) === 'user') {
+        result = yield blog_model_1.Blog.find({
+            $and: [whereCondition, { email: verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.email }],
+        })
+            .sort(sortCondition)
+            .skip(skip)
+            .limit(limit);
+    }
     const total = yield blog_model_1.Blog.countDocuments(whereCondition);
     return {
         meta: {
@@ -84,10 +92,13 @@ const getSingleBlog = (id) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield blog_model_1.Blog.findById(id);
     return result;
 });
-const updateBlog = (id, payload) => __awaiter(void 0, void 0, void 0, function* () {
+const updateBlog = (id, payload, verifiedUser) => __awaiter(void 0, void 0, void 0, function* () {
     const isExist = yield blog_model_1.Blog.findOne({ _id: id });
     if (!isExist) {
         throw new apiError_1.default(http_status_1.default.BAD_REQUEST, 'Blog not found');
+    }
+    if ((verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.role) === 'user' && (isExist === null || isExist === void 0 ? void 0 : isExist.email) !== (verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.email)) {
+        throw new apiError_1.default(http_status_1.default.BAD_REQUEST, 'You are not allowed');
     }
     const result = yield blog_model_1.Blog.findOneAndUpdate({ _id: id }, payload, {
         new: true,
@@ -95,7 +106,11 @@ const updateBlog = (id, payload) => __awaiter(void 0, void 0, void 0, function* 
     return result;
 });
 // Delete Blog
-const deleteBlog = (id) => __awaiter(void 0, void 0, void 0, function* () {
+const deleteBlog = (id, verifiedUser) => __awaiter(void 0, void 0, void 0, function* () {
+    const isExist = yield blog_model_1.Blog.findOne({ _id: id });
+    if ((verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.role) === 'user' && (isExist === null || isExist === void 0 ? void 0 : isExist.email) !== (verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.email)) {
+        throw new apiError_1.default(http_status_1.default.BAD_REQUEST, 'You are not allowed');
+    }
     const result = yield blog_model_1.Blog.findByIdAndDelete(id);
     if (!result) {
         throw new apiError_1.default(http_status_1.default.FORBIDDEN, 'Blog Not Found');

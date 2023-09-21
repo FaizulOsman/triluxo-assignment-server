@@ -57,18 +57,34 @@ const getAllComments = (0, catchAsync_1.default)((req, res) => __awaiter(void 0,
         data: result.data,
     });
 }));
-// Get single Comment by id
-const getSingleComment = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const id = req.params.id;
-    const result = yield comment_service_1.CommentService.getSingleComment(id);
+const getCommentsById = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const filters = (0, pick_1.pick)(req.query, comment_constants_1.commentFilterableFields);
+    const paginationOptions = (0, pick_1.pick)(req.query, pagination_1.paginationFields);
+    const { id } = req.params;
+    const result = yield comment_service_1.CommentService.getCommentsById(id, filters, paginationOptions);
     // Send Response
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
-        message: 'Get Single Comment Successfully',
-        data: result,
+        message: 'Comments retrieved Successfully',
+        meta: result.meta,
+        data: result.data,
     });
 }));
+// Get single Comment by id
+// const getSingleComment: RequestHandler = catchAsync(
+//   async (req: Request, res: Response) => {
+//     const id = req.params.id;
+//     const result = await CommentService.getSingleComment(id);
+//     // Send Response
+//     sendResponse<IComment>(res, {
+//       statusCode: httpStatus.OK,
+//       success: true,
+//       message: 'Get Single Comment Successfully',
+//       data: result,
+//     });
+//   }
+// );
 // Update Comment
 const updateComment = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const id = req.params.id;
@@ -95,7 +111,7 @@ const deleteComment = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, 
 exports.CommentController = {
     createComment,
     getAllComments,
-    getSingleComment,
+    getCommentsById,
     updateComment,
     deleteComment,
 };

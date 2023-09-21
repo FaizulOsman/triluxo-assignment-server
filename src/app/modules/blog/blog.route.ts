@@ -10,7 +10,10 @@ router.post(
   validateRequest(BlogValidation.createBlogZodValidation),
   BlogController.createBlog
 );
-
+router.get(
+  '/get-blogs-by-authorization',
+  BlogController.getBlogsByAuthorization
+);
 router.get('/:id', BlogController.getSingleBlog);
 
 router.delete('/:id', BlogController.deleteBlog);

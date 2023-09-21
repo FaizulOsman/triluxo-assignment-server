@@ -74,11 +74,53 @@ const getAllComments = (filters, paginationOptions) => __awaiter(void 0, void 0,
         data: result,
     };
 });
-// Get Single Comment
-const getSingleComment = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield comment_model_1.Comment.findById(id);
-    return result;
+// Get All Comments (can also filter)
+const getCommentsById = (id, filters, paginationOptions) => __awaiter(void 0, void 0, void 0, function* () {
+    // Try not to use any
+    const { searchTerm } = filters, filtersData = __rest(filters, ["searchTerm"]);
+    const andConditions = []; // Try not to use any
+    if (searchTerm) {
+        andConditions === null || andConditions === void 0 ? void 0 : andConditions.push({
+            $or: comment_constants_1.commentSearchableFields === null || comment_constants_1.commentSearchableFields === void 0 ? void 0 : comment_constants_1.commentSearchableFields.map(field => ({
+                [field]: {
+                    $regex: searchTerm,
+                    $options: 'i',
+                },
+            })),
+        });
+    }
+    if (Object.keys(filtersData).length) {
+        andConditions.push({
+            $and: Object.entries(filtersData).map(([field, value]) => {
+                return { [field]: value };
+            }),
+        });
+    }
+    const { page, limit, skip, sortBy, sortOrder } = paginationHelper_1.paginationHelper.calculatePagination(paginationOptions);
+    const sortCondition = sortBy &&
+        sortOrder && { [sortBy]: sortOrder };
+    const whereCondition = (andConditions === null || andConditions === void 0 ? void 0 : andConditions.length) > 0 ? { $and: andConditions } : {};
+    const result = yield comment_model_1.Comment.find({ $and: [whereCondition, { blogId: id }] })
+        .sort(sortCondition)
+        .skip(skip)
+        .limit(limit);
+    const total = yield comment_model_1.Comment.countDocuments({
+        $and: [whereCondition, { blogId: id }],
+    });
+    return {
+        meta: {
+            page,
+            limit,
+            total,
+        },
+        data: result,
+    };
 });
+// Get Single Comment
+// const getSingleComment = async (id: string): Promise<IComment | null> => {
+//   const result = await Comment.findById(id);
+//   return result;
+// };
 const updateComment = (id, payload) => __awaiter(void 0, void 0, void 0, function* () {
     const isExist = yield comment_model_1.Comment.findOne({ _id: id });
     if (!isExist) {
@@ -100,7 +142,7 @@ const deleteComment = (id) => __awaiter(void 0, void 0, void 0, function* () {
 exports.CommentService = {
     createComment,
     getAllComments,
-    getSingleComment,
+    getCommentsById,
     updateComment,
     deleteComment,
 };
