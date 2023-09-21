@@ -28,7 +28,8 @@ const createBlog = async (
 // Get All Blogs (can also filter)
 const getAllBlogs = async (
   filters: IBlogFilters,
-  paginationOptions: IPaginationOptions
+  paginationOptions: IPaginationOptions,
+  verifiedUser: any
 ): Promise<IGenericResponse<IBlog[]>> => {
   // Try not to use any
   const { searchTerm, ...filtersData } = filters;
@@ -63,10 +64,19 @@ const getAllBlogs = async (
   const whereCondition =
     andConditions?.length > 0 ? { $and: andConditions } : {};
 
-  const result = await Blog.find(whereCondition)
+  let result = await Blog.find(whereCondition)
     .sort(sortCondition)
     .skip(skip)
     .limit(limit);
+
+  if (verifiedUser?.role === 'user') {
+    result = await Blog.find({
+      $and: [whereCondition, { email: verifiedUser?.email }],
+    })
+      .sort(sortCondition)
+      .skip(skip)
+      .limit(limit);
+  }
 
   const total = await Blog.countDocuments(whereCondition);
 
@@ -97,7 +107,7 @@ const updateBlog = async (
     throw new ApiError(httpStatus.BAD_REQUEST, 'Blog not found');
   }
 
-  if (isExist?.email !== verifiedUser?.email) {
+  if (verifiedUser?.role === 'user' && isExist?.email !== verifiedUser?.email) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'You are not allowed');
   }
 
@@ -115,7 +125,7 @@ const deleteBlog = async (
 ): Promise<IBlog | null> => {
   const isExist = await Blog.findOne({ _id: id });
 
-  if (isExist?.email !== verifiedUser?.email) {
+  if (verifiedUser?.role === 'user' && isExist?.email !== verifiedUser?.email) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'You are not allowed');
   }
 

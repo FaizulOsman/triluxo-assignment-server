@@ -40,8 +40,17 @@ const getAllBlogs: RequestHandler = catchAsync(
   async (req: Request, res: Response) => {
     const filters: any = pick(req.query, blogFilterableFields);
     const paginationOptions = pick(req.query, paginationFields);
+    const token: any = req.headers.authorization;
+    const verifiedUser = jwtHelpers.verifyToken(
+      token,
+      config.jwt.secret as Secret
+    );
 
-    const result = await BlogService.getAllBlogs(filters, paginationOptions);
+    const result = await BlogService.getAllBlogs(
+      filters,
+      paginationOptions,
+      verifiedUser
+    );
 
     // Send Response
     sendResponse<IBlog[]>(res, {
