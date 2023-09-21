@@ -4,9 +4,9 @@ import { IBlog, BlogModel } from './blog.interface';
 // Blog Schema
 const BlogSchema = new Schema<IBlog, BlogModel>(
   {
-    imgUrl: {
+    imageUrl: {
       type: String,
-      required: [false, 'imgUrl is missing!'],
+      required: [false, 'imageUrl is missing!'],
     },
     videoUrl: {
       type: String,

@@ -1,7 +1,7 @@
 import { Model } from 'mongoose';
 
 export type IBlog = {
-  imgUrl?: string;
+  imageUrl?: string;
   videoUrl?: string;
   title?: string;
   description: string;
