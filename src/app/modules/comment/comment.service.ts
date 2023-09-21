@@ -71,12 +71,70 @@ const getAllComments = async (
   };
 };
 
-// Get Single Comment
-const getSingleComment = async (id: string): Promise<IComment | null> => {
-  const result = await Comment.findById(id);
+// Get All Comments (can also filter)
+const getCommentsById = async (
+  id: string,
+  filters: ICommentFilters,
+  paginationOptions: IPaginationOptions
+): Promise<IGenericResponse<IComment[]>> => {
+  // Try not to use any
+  const { searchTerm, ...filtersData } = filters;
 
-  return result;
+  const andConditions = []; // Try not to use any
+
+  if (searchTerm) {
+    andConditions?.push({
+      $or: commentSearchableFields?.map(field => ({
+        [field]: {
+          $regex: searchTerm,
+          $options: 'i',
+        },
+      })),
+    });
+  }
+
+  if (Object.keys(filtersData).length) {
+    andConditions.push({
+      $and: Object.entries(filtersData).map(([field, value]) => {
+        return { [field]: value };
+      }),
+    });
+  }
+
+  const { page, limit, skip, sortBy, sortOrder } =
+    paginationHelper.calculatePagination(paginationOptions);
+
+  const sortCondition: '' | { [key: string]: SortOrder } = sortBy &&
+    sortOrder && { [sortBy]: sortOrder };
+
+  const whereCondition =
+    andConditions?.length > 0 ? { $and: andConditions } : {};
+
+  const result = await Comment.find({ $and: [whereCondition, { blogId: id }] })
+    .sort(sortCondition)
+    .skip(skip)
+    .limit(limit);
+
+  const total = await Comment.countDocuments({
+    $and: [whereCondition, { blogId: id }],
+  });
+
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+    },
+    data: result,
+  };
 };
+
+// Get Single Comment
+// const getSingleComment = async (id: string): Promise<IComment | null> => {
+//   const result = await Comment.findById(id);
+
+//   return result;
+// };
 
 const updateComment = async (
   id: string,
@@ -106,7 +164,7 @@ const deleteComment = async (id: string): Promise<IComment | null> => {
 export const CommentService = {
   createComment,
   getAllComments,
-  getSingleComment,
+  getCommentsById,
   updateComment,
   deleteComment,
 };

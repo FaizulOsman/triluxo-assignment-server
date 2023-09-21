@@ -48,21 +48,44 @@ const getAllComments: RequestHandler = catchAsync(
   }
 );
 
-// Get single Comment by id
-const getSingleComment: RequestHandler = catchAsync(
+const getCommentsById: RequestHandler = catchAsync(
   async (req: Request, res: Response) => {
-    const id = req.params.id;
-    const result = await CommentService.getSingleComment(id);
+    const filters = pick(req.query, commentFilterableFields);
+    const paginationOptions = pick(req.query, paginationFields);
+    const { id } = req.params;
+
+    const result = await CommentService.getCommentsById(
+      id,
+      filters,
+      paginationOptions
+    );
 
     // Send Response
-    sendResponse<IComment>(res, {
+    sendResponse<IComment[]>(res, {
       statusCode: httpStatus.OK,
       success: true,
-      message: 'Get Single Comment Successfully',
-      data: result,
+      message: 'Comments retrieved Successfully',
+      meta: result.meta,
+      data: result.data,
     });
   }
 );
+
+// Get single Comment by id
+// const getSingleComment: RequestHandler = catchAsync(
+//   async (req: Request, res: Response) => {
+//     const id = req.params.id;
+//     const result = await CommentService.getSingleComment(id);
+
+//     // Send Response
+//     sendResponse<IComment>(res, {
+//       statusCode: httpStatus.OK,
+//       success: true,
+//       message: 'Get Single Comment Successfully',
+//       data: result,
+//     });
+//   }
+// );
 
 // Update Comment
 const updateComment: RequestHandler = catchAsync(async (req, res) => {
@@ -96,7 +119,7 @@ const deleteComment: RequestHandler = catchAsync(async (req, res) => {
 export const CommentController = {
   createComment,
   getAllComments,
-  getSingleComment,
+  getCommentsById,
   updateComment,
   deleteComment,
 };

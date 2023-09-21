@@ -13,7 +13,8 @@ router.post(
   CommentController.createComment
 );
 
-router.get('/:id', CommentController.getSingleComment);
+// router.get('/:id', CommentController.getSingleComment);
+router.get('/:id', CommentController.getCommentsById);
 
 router.delete(
   '/:id',
