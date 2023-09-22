@@ -40,7 +40,47 @@ const createBlog = (payload, verifiedUser) => __awaiter(void 0, void 0, void 0, 
     return result;
 });
 // Get All Blogs (can also filter)
-const getAllBlogs = (filters, paginationOptions, verifiedUser) => __awaiter(void 0, void 0, void 0, function* () {
+const getAllBlogs = (filters, paginationOptions) => __awaiter(void 0, void 0, void 0, function* () {
+    // Try not to use any
+    const { searchTerm } = filters, filtersData = __rest(filters, ["searchTerm"]);
+    const andConditions = []; // Try not to use any
+    if (searchTerm) {
+        andConditions === null || andConditions === void 0 ? void 0 : andConditions.push({
+            $or: blog_constants_1.blogSearchableFields === null || blog_constants_1.blogSearchableFields === void 0 ? void 0 : blog_constants_1.blogSearchableFields.map(field => ({
+                [field]: {
+                    $regex: searchTerm,
+                    $options: 'i',
+                },
+            })),
+        });
+    }
+    if (Object.keys(filtersData).length) {
+        andConditions.push({
+            $and: Object.entries(filtersData).map(([field, value]) => {
+                return { [field]: value };
+            }),
+        });
+    }
+    const { page, limit, skip, sortBy, sortOrder } = paginationHelper_1.paginationHelper.calculatePagination(paginationOptions);
+    const sortCondition = sortBy &&
+        sortOrder && { [sortBy]: sortOrder };
+    const whereCondition = (andConditions === null || andConditions === void 0 ? void 0 : andConditions.length) > 0 ? { $and: andConditions } : {};
+    const result = yield blog_model_1.Blog.find(whereCondition)
+        .sort(sortCondition)
+        .skip(skip)
+        .limit(limit);
+    const total = yield blog_model_1.Blog.countDocuments(whereCondition);
+    return {
+        meta: {
+            page,
+            limit,
+            total,
+        },
+        data: result,
+    };
+});
+// Get Blogs By Authorization (can also filter)
+const getBlogsByAuthorization = (filters, paginationOptions, verifiedUser) => __awaiter(void 0, void 0, void 0, function* () {
     // Try not to use any
     const { searchTerm } = filters, filtersData = __rest(filters, ["searchTerm"]);
     const andConditions = []; // Try not to use any
@@ -120,6 +160,7 @@ const deleteBlog = (id, verifiedUser) => __awaiter(void 0, void 0, void 0, funct
 exports.BlogService = {
     createBlog,
     getAllBlogs,
+    getBlogsByAuthorization,
     getSingleBlog,
     updateBlog,
     deleteBlog,

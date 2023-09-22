@@ -15,7 +15,7 @@ const router = express_1.default.Router();
 router.post('/create-comment', (0, validateRequest_1.default)(comment_validation_1.CommentValidation.createCommentZodValidation), comment_controller_1.CommentController.createComment);
 // router.get('/:id', CommentController.getSingleComment);
 router.get('/:id', comment_controller_1.CommentController.getCommentsById);
-router.delete('/:id', (0, auth_1.default)(user_1.ENUM_USER_ROLE.ADMIN), comment_controller_1.CommentController.deleteComment);
+router.delete('/:id', (0, auth_1.default)(user_1.ENUM_USER_ROLE.ADMIN, user_1.ENUM_USER_ROLE.USER), comment_controller_1.CommentController.deleteComment);
 router.patch('/:id', (0, validateRequest_1.default)(comment_validation_1.CommentValidation.updateCommentZodValidation), comment_controller_1.CommentController.updateComment);
 router.get('/', comment_controller_1.CommentController.getAllComments);
 exports.CommentRoutes = router;

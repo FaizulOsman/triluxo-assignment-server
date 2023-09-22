@@ -11,6 +11,7 @@ const blog_validation_1 = require("./blog.validation");
 const router = express_1.default.Router();
 // Routes
 router.post('/create-blog', (0, validateRequest_1.default)(blog_validation_1.BlogValidation.createBlogZodValidation), blog_controller_1.BlogController.createBlog);
+router.get('/get-blogs-by-authorization', blog_controller_1.BlogController.getBlogsByAuthorization);
 router.get('/:id', blog_controller_1.BlogController.getSingleBlog);
 router.delete('/:id', blog_controller_1.BlogController.deleteBlog);
 router.patch('/:id', (0, validateRequest_1.default)(blog_validation_1.BlogValidation.updateBlogZodValidation), blog_controller_1.BlogController.updateBlog);

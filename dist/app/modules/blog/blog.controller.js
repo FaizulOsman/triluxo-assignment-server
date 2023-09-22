@@ -51,9 +51,23 @@ const createBlog = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, voi
 const getAllBlogs = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const filters = (0, pick_1.pick)(req.query, blog_constants_1.blogFilterableFields);
     const paginationOptions = (0, pick_1.pick)(req.query, pagination_1.paginationFields);
+    const result = yield blog_service_1.BlogService.getAllBlogs(filters, paginationOptions);
+    // Send Response
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: 'Blogs retrieved Successfully',
+        meta: result.meta,
+        data: result.data,
+    });
+}));
+// Get Blogs By Authorization
+const getBlogsByAuthorization = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const filters = (0, pick_1.pick)(req.query, blog_constants_1.blogFilterableFields);
+    const paginationOptions = (0, pick_1.pick)(req.query, pagination_1.paginationFields);
     const token = req.headers.authorization;
     const verifiedUser = jwtHelpers_1.jwtHelpers.verifyToken(token, config_1.default.jwt.secret);
-    const result = yield blog_service_1.BlogService.getAllBlogs(filters, paginationOptions, verifiedUser);
+    const result = yield blog_service_1.BlogService.getBlogsByAuthorization(filters, paginationOptions, verifiedUser);
     // Send Response
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
@@ -105,6 +119,7 @@ const deleteBlog = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, voi
 exports.BlogController = {
     createBlog,
     getAllBlogs,
+    getBlogsByAuthorization,
     getSingleBlog,
     updateBlog,
     deleteBlog,
